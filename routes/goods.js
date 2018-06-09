@@ -1,8 +1,10 @@
+//  /index route is set up in app.js
 var express = require('express');
 var router = express.Router();
 // var mongoose = require('../models/goods');
 var mongoose = require('mongoose');
 var Goods = require('../models/goods');
+var Users = require('../models/users');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mall');
 
@@ -18,6 +20,7 @@ mongoose.connection.on("disconnected",function(){
 	console.log("mongodb connection disconnected");
 });
 
+//  api: /good/
 router.get("/",function(req,res,next){
 	Goods.find({},function(err,doc){
 		if(err){
@@ -37,6 +40,7 @@ router.get("/",function(req,res,next){
 	})
 });
 
+//api: /good/sort
 router.get("/sort",function(req,res,next){
 
 	const param = parseInt(req.param('sort'));
@@ -97,6 +101,72 @@ router.get("/sort",function(req,res,next){
 			}
 		}
 	})
+});
+
+// api  /good/cart
+// req: productid , 
+router.post("/cart",function(req,res,next){
+	const prodid = req.body.productid?req.body.productid:req.headers.productid;
+
+	const userId = '10001';
+ 
+	Users.findOne({userId: userId},function(err,doc){
+
+		if(err){
+			res.json({
+				status: '1',
+				msg: err.message
+			})
+		}else{
+			Goods.findOne({productId: prodid},function(inrErr,inrDoc){
+				if(inrErr){
+					res.json({
+						status: '1',
+						msg: inrErr.message
+					})
+				}else{
+					var checkList = false; //check whether item is already in cart 
+
+					var repeatIdx='';
+
+					for(var i=0;i<doc.cartList.length;i++){
+						if(doc.cartList[i].productId === inrDoc.productId){
+							checkList = true;
+							repeatIdx = i;
+							break;
+						}
+					};
+					// if there is a item, num++, else push a new item
+					if(checkList){ 
+						doc.cartList[repeatIdx].productNum++;
+						 doc.markModified('cartList');
+
+					}else{
+						inrDoc.productNum = 1;
+						doc.cartList.push(inrDoc);
+					};
+
+					doc.save(function(errSave,docSave){
+						if(errSave){
+							res.json({
+								status: '1',
+								msg: errSave.message
+							})
+						}else{
+
+							res.json({
+								status: '0',
+								result: docSave
+							})
+						}
+					});
+
+				}
+			});
+		}
+	})
+
+
 });
 
 module.exports = router;

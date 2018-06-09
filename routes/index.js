@@ -1,3 +1,4 @@
+//  /index route is set up in app.js
 var express = require('express');
 var router = express.Router();
 

@@ -5,7 +5,10 @@ const productSchema = new Schema({
 	"productId": String,
 	"productName": String,
 	"salePrice": Number,
-	"productImg": String
+	"productImg": String,
+	"productNum": Number
 });
+
+//connect schema with collections
 
 module.exports = mongoose.model('Goods',productSchema); 
