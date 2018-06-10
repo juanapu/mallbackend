@@ -1,24 +1,10 @@
 //  /index route is set up in app.js
 var express = require('express');
 var router = express.Router();
-// var mongoose = require('../models/goods');
-var mongoose = require('mongoose');
+
+//mongoose is set in index
 var Goods = require('../models/goods');
 var Users = require('../models/users');
-
-mongoose.connect('mongodb://127.0.0.1:27017/mall');
-
-mongoose.connection.on("connected",function(){
-	console.log("mongodb conncted successfully")
-});
-
-mongoose.connection.on("error",function(){
-	console.log("mongodb connect fail");
-});
-
-mongoose.connection.on("disconnected",function(){
-	console.log("mongodb connection disconnected");
-});
 
 //  api: /good/
 router.get("/",function(req,res,next){
