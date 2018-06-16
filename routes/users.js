@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
 });
 
 
-// status: 0: success, status 1: connection error, status 2: respond error, status 3: password is not correct
+// status: 0: success, status 1: connection error, status 2: respond error, status 3: password is not correct; status: 1001  (not login)
 router.post('/login',function(req,res,next){
 	var params = {
 		username: req.headers.username?req.headers.username:(req.body.username?req.body.username:null),
@@ -32,6 +32,7 @@ router.post('/login',function(req,res,next){
 					if(userRES){
 						// here is the result
 						if(userRES.userPwd.toString() === params.userpwd.toString()){
+							res.cookie("userId",userRES.userId);
 							res.json({
 								status: '0',
 								result: {
@@ -67,5 +68,15 @@ router.post('/login',function(req,res,next){
 	};
 
 });
+
+router.post('/logout',function(req,res,next){
+	res.cookie("userId",'');
+	res.json({
+		status: '0',
+		result: {
+			msg: 'logout successfully'
+		}
+	})
+})
 
 module.exports = router;
