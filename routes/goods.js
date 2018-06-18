@@ -94,7 +94,7 @@ router.get("/sort",function(req,res,next){
 router.post("/cart",function(req,res,next){
 	const prodid = req.body.productid?req.body.productid:req.headers.productid;
 
-	const userId = '10001';
+	const userId = req.cookies.userId;
  
 	Users.findOne({userId: userId},function(err,doc){
 
@@ -154,5 +154,63 @@ router.post("/cart",function(req,res,next){
 
 
 });
+
+router.post("/cartList",function(req,res,next){
+	const userId = req.cookies.userId;
+	Users.findOne({userId: userId},function(err,doc){
+		if(err){
+			res.json({
+				status: '1',
+				msg: err.message
+			})
+		}else{
+			res.json({
+				status: '0',
+				result: {
+					data: doc.cartList
+				}
+			})	
+		}
+
+	})
+})
+
+router.post("/cartUpdate",function(req,res,next){
+	const userId = req.cookies.userId;
+	const productid = req.body.productid?req.body.productid:req.headers.productid;
+	const updele = req.body.updele?req.body.updele:req.headers.updele;
+	const updeleval = req.body.updeleval?req.body.updeleval:req.headers.updeleval;
+	Users.findOne({userId: userId},function(err,doc){
+		if(err){
+			res.json({
+				status: '1',
+				msg: err.message
+			})
+		}else{
+			const list  = doc.cartList;
+			list.forEach(function(val){
+				if(val.productId === productid){
+					console.log(" -- here is it --"+productid);
+					val[updele] = updeleval;
+				}
+			});
+			doc.markModified('cartList');
+
+			doc.save(function(errSave,docSave){
+				if(errSave){
+					res.json({
+						status: '1',
+						msg: errSave.message
+					})
+				}else{
+					res.json({
+						status: '0',
+						result: docSave
+					})
+				}
+			});
+		}	
+	})
+})
 
 module.exports = router;
