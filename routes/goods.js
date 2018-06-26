@@ -129,6 +129,7 @@ router.post("/cart",function(req,res,next){
 
 					}else{
 						inrDoc.productNum = 1;
+					     inrDoc.cartChecked = false;   // add a checked key to cartlist data for specific user
 						doc.cartList.push(inrDoc);
 					};
 
@@ -273,6 +274,59 @@ router.post("/cartDelete",function(req,res,next){
 					}
 				}
 			});
+		}
+	})
+})
+
+//update checked item
+//input: productid: productid of checked product (string)
+router.post("/cartChecked",function(req,res,next){
+	const userId = req.cookies.userId;
+	const productid = req.body.productid?req.body.productid:req.headers.productid;
+	Users.findOne({userId: userId},function(err,doc){
+		if(err){
+			res.json({
+				status: '1',
+				msg: err.message
+			})
+		}else{
+			const list = doc.cartList;
+			let checkExist = 0;
+
+			for(let i=0;i<list.length;i++){				
+				if(list[i].productId === productid){
+					checkExist++;
+					doc.cartList[i].cartChecked = !doc.cartList[i].cartChecked;
+					break;
+				}
+			}
+
+			doc.markModified('cartList');
+
+			doc.save(function(errSave,docSave){
+				if(errSave){
+					res.json({
+						status: '1',
+						msg: errSave.message
+					})
+				}else{
+					if(!checkExist){
+						res.json({
+							status: '2',
+							result: {
+								msg: 'no such item'
+							}
+						})
+					}else{
+						res.json({
+								status: '0',
+								result: {
+									msg: 'success'
+								}
+							})
+						}
+				}
+			})
 		}
 	})
 })

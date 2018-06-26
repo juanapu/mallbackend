@@ -6,7 +6,8 @@ const productSchema = new Schema({
 	"productName": String,
 	"salePrice": Number,
 	"productImg": String,
-	"productNum": Number
+	"productNum": Number,
+	"cartChecked": Boolean
 });
 
 //connect schema with collections
