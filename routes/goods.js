@@ -175,6 +175,8 @@ router.post("/cartList",function(req,res,next){
 	})
 })
 
+// req:  productid, updele: update element, updeveval: update element value
+// res: cartList data
 router.post("/cartUpdate",function(req,res,next){
 	const userId = req.cookies.userId;
 	const productid = req.body.productid?req.body.productid:req.headers.productid;
@@ -190,10 +192,10 @@ router.post("/cartUpdate",function(req,res,next){
 			const list  = doc.cartList;
 			list.forEach(function(val){
 				if(val.productId === productid){
-					console.log(" -- here is it --"+productid);
-					val[updele] = updeleval;
+						val[updele] = updeleval;
 				}
 			});
+
 			doc.markModified('cartList');
 
 			doc.save(function(errSave,docSave){
@@ -210,6 +212,68 @@ router.post("/cartUpdate",function(req,res,next){
 				}
 			});
 		}	
+	})
+})
+
+
+//productids : product id array [] 
+router.post("/cartDelete",function(req,res,next){
+	const userId = req.cookies.userId;
+	const productidsStr = req.body.productids?req.body.productids:req.headers.productids;
+	const productids = productidsStr.split('-');
+	let deleteNum = 0;
+
+	Users.findOne({userId: userId},function(err,doc){
+		if(err){
+			res.json({
+				status: '1',
+				msg: err.message
+			})
+		}else{
+			const list = doc.cartList;
+			let lstLength = list.length;
+			let proLength = productids.length;
+
+			for(let i=0;i<lstLength;i++){
+				for(let j=0;j<proLength;j++){
+					if(list[i].productId===productids[j]){
+						deleteNum++;
+						list.splice(i,1);
+						productids.splice(j,1);
+						lstLength--;
+						proLength;
+						i--;
+						j--;
+						break;
+					}
+				}
+			}
+			
+			doc.markModified('cartList');
+
+			doc.save(function(errSave,docSave){
+				if(errSave){
+					res.json({
+						status: '1',
+						msg: errSave.message
+					})
+				}else{
+					if(deleteNum){
+						res.json({
+							status: '0',
+							result: docSave
+						})
+					}else{
+						res.json({
+							status: '2',
+							result:{
+								msg: 'Can not find these data'
+							}
+						})	
+					}
+				}
+			});
+		}
 	})
 })
 
